@@ -1,10 +1,16 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Contact from './pages/Contact';
 import ContactList from './components/ContactList';
+import Login from './pages/Login';
 import Footer from './components/Footer';
+
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const token = localStorage.getItem('access_token');
+  return token ? <>{children}</> : <Navigate to="/login" />;
+};
 
 const App: React.FC = () => {
   return (
@@ -15,7 +21,15 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/admin/contacts" element={<ContactList />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/admin/contacts"
+              element={
+                <PrivateRoute>
+                  <ContactList />
+                </PrivateRoute>
+              }
+            />
           </Routes>
         </main>
         <Footer />

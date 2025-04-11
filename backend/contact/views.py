@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Contact
@@ -79,3 +79,4 @@ class ContactCreateView(generics.CreateAPIView):
 class ContactListView(generics.ListAPIView):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
+    permission_classes = [permissions.IsAuthenticated]
