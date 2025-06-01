@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Contact
-import re
+from django.core.validators import RegexValidator
 
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,9 +16,16 @@ class ContactSerializer(serializers.ModelSerializer):
         return value
 
     def validate_phone(self, value):
-        if value:
-            # Remove any non-digit characters
-            cleaned = re.sub(r'\D', '', value)
-            if len(cleaned) < 5:
-                raise serializers.ValidationError("Phone number must be at least 5 digits")
-        return value 
+        if not value:  # Skip validation if phone is empty
+            return value
+            
+        # Remove any non-digit characters except '+'
+        cleaned = ''.join(c for c in value if c.isdigit() or c == '+')
+        
+        # Validate the cleaned phone number
+        validator = RegexValidator(
+            regex=r'^\+?1?\d{9,15}$',
+            message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
+        )
+        validator(cleaned)
+        return cleaned 
