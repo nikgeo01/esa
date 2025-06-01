@@ -1,21 +1,29 @@
-// Simple authentication utilities
-// For demo purposes, we're using a hardcoded username and password
-// In a real application, this would connect to a backend service
-const DEMO_USERNAME = 'admin';
-const DEMO_PASSWORD = 'password123';
+import api from '../services/api';
+
 // Check if user is authenticated
 export const isAuthenticated = (): boolean => {
-  return localStorage.getItem('auth') === 'true';
+  return !!localStorage.getItem('token');
 };
+
 // Login function
-export const login = (username: string, password: string): boolean => {
-  if (username === DEMO_USERNAME && password === DEMO_PASSWORD) {
-    localStorage.setItem('auth', 'true');
+export const login = async (username: string, password: string): Promise<boolean> => {
+  try {
+    const response = await api.post('/token/', {
+      username,
+      password,
+    });
+    localStorage.setItem('token', response.data.access);
+    if (response.data.refresh) {
+      localStorage.setItem('refresh_token', response.data.refresh);
+    }
     return true;
+  } catch (error) {
+    return false;
   }
-  return false;
 };
+
 // Logout function
 export const logout = (): void => {
-  localStorage.removeItem('auth');
+  localStorage.removeItem('token');
+  localStorage.removeItem('refresh_token');
 };
